@@ -1,0 +1,81 @@
+import argparse
+import sys
+import cv2
+import numpy
+import numpy as np
+import time
+import time as clock
+
+#Open an image
+img = cv2.imread('img.jpg', 1)
+cv2.imshow('Image',img)
+print(img)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+#convert to grayScale
+gray_img= cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+#save to new file
+cv2.imwrite('NewGrayImage.jpg',gray_img)
+cv2.imshow('New Image GrayScale',gray_img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+#ask user to enter gamma value
+
+def adjust_gamma(img, gamma=1.0):
+
+	invGamma =  gamma
+	table = np.array([((i / 255.0) ** invGamma) * 255
+		for i in np.arange(0, 256)]).astype("uint8")
+	# apply gamma correction using the lookup table
+	return cv2.LUT(img, table)
+
+# load the original image
+original = cv2.imread('NewGrayImage.jpg')
+# when gamma is 1 (there will be no change to the image)
+
+print("Enter value: ")
+val = input()
+converted_val = float(val)
+# apply gamma correction and show the images
+
+TimeinTicks = time.process_time()
+start_time2 = time.time()
+gamma = converted_val if converted_val > 0 else 0.1
+adjusted = adjust_gamma(original, gamma=converted_val)
+cv2.putText(adjusted, "g={}".format(gamma), (10, 30),cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 3)
+#cv2.imshow("Images", np.hstack([original, adjusted]))
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+# save enhanced images:
+# save to new file
+cv2.imwrite('Enhanced1.jpg', adjusted)
+cv2.imshow('With LUT', adjusted)
+cv2.imshow('GrayImage', gray_img)
+print(" %s In seconds " % (time.time() - start_time2))
+print(" %s In Ticks " % (time.process_time() - TimeinTicks))
+
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+image = cv2.imread('NewGrayImage.jpg', 1)
+new_image = np.zeros(image.shape, image.dtype)
+
+
+TimeinTicks2 = time.process_time()
+start_time = time.time()
+for y in range(image.shape[0]):
+    for x in range(image.shape[1]):
+     new_image[y, x] = np.clip(255* ((image[y,x]/255) ** (gamma)),0, 255)
+
+cv2.imshow('GrayImage', image)
+cv2.imshow('WithoutLUT', new_image)
+cv2.imwrite('Enhanced1.jpg',new_image)
+
+print(" %s In seconds  " % (time.time() - start_time))
+print(" %s In Ticks " % (time.process_time() - TimeinTicks2))
+cv2.waitKey(0)
